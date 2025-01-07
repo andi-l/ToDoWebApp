@@ -159,4 +159,33 @@ public class TaskListController {
     public List<TaskList> getTaskListsSortedByTaskCountDesc(@Argument String username) {
         return taskListService.getTaskListsSortedByTaskCountDesc(username);
     }
+
+    // Toggles the completion status of a task and updates its completion date
+    @SchemaMapping(typeName = "Mutation", field = "toggleTaskCompletion")
+    public Task toggleTaskCompletion(
+            @Argument Long taskListId,
+            @Argument Long taskId,
+            @Argument boolean isCompleted) {
+        return taskListService.toggleTaskCompletion(taskListId, taskId, isCompleted);
+    }
+
+    // Updates the details of a task, such as title, description, and due date
+    @SchemaMapping(typeName = "Mutation", field = "updateTaskDetails")
+    public Task updateTaskDetails(
+            @Argument Long taskListId,
+            @Argument Long taskId,
+            @Argument String title,
+            @Argument String description,
+            @Argument String dueDate) {
+        LocalDate parsedDueDate = dueDate != null ? LocalDate.parse(dueDate) : null;
+        return taskListService.updateTaskDetails(taskListId, taskId, title, description, parsedDueDate);
+    }
+
+    // Updates the title of a TaskList
+    @SchemaMapping(typeName = "Mutation", field = "updateTaskListTitle")
+    public TaskList updateTaskListTitle(
+            @Argument Long taskListId,
+            @Argument String title) {
+        return taskListService.updateTaskListTitle(taskListId, title);
+    }
 }
