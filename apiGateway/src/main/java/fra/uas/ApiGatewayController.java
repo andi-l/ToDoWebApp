@@ -1,5 +1,9 @@
 package fra.uas;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import fra.uas.model.TaskList;
 import fra.uas.model.User;
 import fra.uas.model.UserDTO;
 import org.springframework.beans.factory.annotation.Value;
@@ -276,6 +280,42 @@ public class ApiGatewayController {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Failed to toggle task completion: " + e.getMessage());
+        }
+    }
+
+    private List<TaskList> getAndValidateTaskLists(String authToken, String username) throws JsonProcessingException {
+        // Validate authorization
+        var reso = protectedEndpoint(authToken);
+        if (!reso.getStatusCode().is2xxSuccessful()) {
+            throw new RuntimeException("Unauthorized access. Please login.");
+        }
+
+        // Retrieve task lists
+        var response = getTaskListsByUsername(username, authToken);
+        if (!response.getStatusCode().is2xxSuccessful()) {
+            throw new RuntimeException("Error retrieving task lists: " + response.getStatusCode());
+        }
+
+        // Extract and deserialize task lists so that the Analyticservice can use them
+        String taskListsJson = (String) response.getBody();
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.registerModule(new JavaTimeModule());
+        Root root = objectMapper.readValue(taskListsJson, Root.class);
+
+        return root.getData().getGetTaskListsByUsername();
+    }
+
+    //Forward the request to the analytic service
+    private ResponseEntity<String> forwardAnalyticsRequest(
+            String url, List<TaskList> taskLists) {
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            HttpEntity<List<TaskList>> request = new HttpEntity<>(taskLists, headers);
+
+            return restTemplate.postForEntity(url, request, String.class);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to forward analytics request: " + e.getMessage(), e);
         }
     }
 }
