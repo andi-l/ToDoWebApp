@@ -135,4 +135,28 @@ public class TaskListController {
     public TaskList deleteTasksFromTaskList(@Argument Long taskListId, @Argument List<Long> taskIds) {
         return taskListService.deleteTasksFromTaskList(taskListId, taskIds);
     }
+
+    // Retrieves TaskLists sorted by creation date in ascending order
+    @SchemaMapping(typeName = "Query", field = "getTaskListsSortedByCreationDateAsc")
+    public List<TaskList> getTaskListsSortedByCreationDateAsc(@Argument String username) {
+        return taskListService.getTaskListsSortedByCreationDateAsc(username);
+    }
+
+    // Retrieves TaskLists sorted by creation date in descending order
+    @SchemaMapping(typeName = "Query", field = "getTaskListsSortedByCreationDateDesc")
+    public List<TaskList> getTaskListsSortedByCreationDateDesc(@Argument String username) {
+        return taskListService.getTaskListsSortedByCreationDateDesc(username);
+    }
+
+    // Retrieves TaskLists sorted by task count in ascending order
+    @SchemaMapping(typeName = "Query", field = "getTaskListsSortedByTaskCountAsc")
+    public List<TaskList> getTaskListsSortedByTaskCountAsc(@Argument String username) {
+        return taskListService.getTaskListsSortedByTaskCountAsc(username);
+    }
+
+    // Retrieves TaskLists sorted by task count in descending order
+    @SchemaMapping(typeName = "Query", field = "getTaskListsSortedByTaskCountDesc")
+    public List<TaskList> getTaskListsSortedByTaskCountDesc(@Argument String username) {
+        return taskListService.getTaskListsSortedByTaskCountDesc(username);
+    }
 }
