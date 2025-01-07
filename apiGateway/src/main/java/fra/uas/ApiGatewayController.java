@@ -364,4 +364,105 @@ public class ApiGatewayController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
         }
     }
+
+    //Update the details of a Task in a Tasklist
+    @PatchMapping("/tasklists/{taskListId}/tasks/{taskId}")
+    public ResponseEntity<?> updateTaskDetails(
+            @PathVariable Long taskListId,
+            @PathVariable Long taskId,
+            @RequestBody Map<String, String> updates,
+            @RequestHeader("Authorization") String authToken) {
+
+        // Validate authorization
+        var reso = protectedEndpoint(authToken);
+        if (!reso.getStatusCode().is2xxSuccessful()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("You need to login to modify tasks.");
+        }
+
+        // GraphQL mutation query
+        String query = """
+                    mutation UpdateTaskDetails($taskListId: ID!, $taskId: ID!, $title: String, $description: String, $dueDate: String) {
+                        updateTaskDetails(taskListId: $taskListId, taskId: $taskId, title: $title, description: $description, dueDate: $dueDate) {
+                            id
+                            title
+                            taskDescription
+                            dueDate
+                        }
+                    }
+                """;
+
+        // Extract request variables
+        Map<String, Object> variables = Map.of(
+                "taskListId", taskListId,
+                "taskId", taskId,
+                "title", updates.get("title"),
+                "description", updates.get("description"),
+                "dueDate", updates.get("dueDate")
+        );
+
+        // Build the request body
+        Map<String, Object> body = Map.of("query", query, "variables", variables);
+
+        // Forward the request to the GraphQL backend
+        String url = todoBackendUrl + "/graphql";
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<Map<String, Object>> entity = new HttpEntity<>(body, headers);
+
+        try {
+            ResponseEntity<String> response = restTemplate.postForEntity(url, entity, String.class);
+            return ResponseEntity.status(response.getStatusCode()).body(response.getBody());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Failed to update task details: " + e.getMessage());
+        }
+    }
+
+
+    //Update the details of a Tasklist
+    @PatchMapping("/tasklists/{taskListId}")
+    public ResponseEntity<?> updateTaskListTitle(
+            @PathVariable Long taskListId,
+            @RequestBody Map<String, String> updates,
+            @RequestHeader("Authorization") String authToken) {
+
+        // Validate authorization
+        var reso = protectedEndpoint(authToken);
+        if (!reso.getStatusCode().is2xxSuccessful()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("You need to login to modify task lists.");
+        }
+
+        // GraphQL mutation query
+        String query = """
+                    mutation UpdateTaskListTitle($taskListId: ID!, $title: String!) {
+                        updateTaskListTitle(taskListId: $taskListId, title: $title) {
+                            id
+                            title
+                        }
+                    }
+                """;
+
+        // Extract request variables
+        Map<String, Object> variables = Map.of(
+                "taskListId", taskListId,
+                "title", updates.get("title")
+        );
+
+        // Build the request body
+        Map<String, Object> body = Map.of("query", query, "variables", variables);
+
+        // Forward the request to the GraphQL backend
+        String url = todoBackendUrl + "/graphql";
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<Map<String, Object>> entity = new HttpEntity<>(body, headers);
+
+        try {
+            ResponseEntity<String> response = restTemplate.postForEntity(url, entity, String.class);
+            return ResponseEntity.status(response.getStatusCode()).body(response.getBody());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Failed to update task list title: " + e.getMessage());
+        }
+    }
 }
