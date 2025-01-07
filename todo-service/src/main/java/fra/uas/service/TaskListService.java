@@ -113,4 +113,49 @@ public class TaskListService {
                 .sorted(Comparator.comparing((TaskList taskList) -> taskList.getTasks().size()).reversed())
                 .collect(Collectors.toList());
     }
+
+    // Toggles the completion status of a task and updates its completion date accordingly
+    public Task toggleTaskCompletion(Long taskListId, Long taskId, boolean isCompleted) {
+        TaskList taskList = taskListRepository.findById(taskListId)
+                .orElseThrow(() -> new IllegalArgumentException("TaskList with ID " + taskListId + " not found."));
+        Task task = taskList.getTasks().stream()
+                .filter(t -> t.getId().equals(taskId))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("Task with ID " + taskId + " not found in TaskList " + taskListId));
+        task.setCompleted(isCompleted);
+        task.setCompletionDate(isCompleted ? LocalDate.now() : null);
+        taskListRepository.save(taskList);
+        return task;
+    }
+
+    // Updates the details of a specific task in a TaskList
+    public Task updateTaskDetails(Long taskListId, Long taskId, String title, String description, LocalDate dueDate) {
+        TaskList taskList = taskListRepository.findById(taskListId)
+                .orElseThrow(() -> new IllegalArgumentException("TaskList with ID " + taskListId + " not found."));
+        Task task = taskList.getTasks().stream()
+                .filter(t -> t.getId().equals(taskId))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("Task with ID " + taskId + " not found in TaskList " + taskListId));
+        if (title != null) {
+            task.setTitle(title);
+        }
+        if (description != null) {
+            task.setTaskDescription(description);
+        }
+        if (dueDate != null) {
+            task.setDueDate(dueDate);
+        }
+        taskListRepository.save(taskList);
+        return task;
+    }
+
+    // Updates the title of a specific TaskList
+    public TaskList updateTaskListTitle(Long taskListId, String title) {
+        TaskList taskList = taskListRepository.findById(taskListId)
+                .orElseThrow(() -> new IllegalArgumentException("TaskList with ID " + taskListId + " not found."));
+        if (title != null) {
+            taskList.setTitle(title);
+        }
+        return taskListRepository.save(taskList);
+    }
 }
