@@ -6,7 +6,9 @@ import fra.uas.repository.TaskListRepository;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class TaskListService {
@@ -82,5 +84,33 @@ public class TaskListService {
                 .toList();
         taskList.getTasks().removeAll(tasksToRemove);
         return taskListRepository.save(taskList);
+    }
+
+    // Retrieves TaskLists for a username, sorted by creation date in ascending order
+    public List<TaskList> getTaskListsSortedByCreationDateAsc(String username) {
+        return taskListRepository.findByUsername(username).stream()
+                .sorted(Comparator.comparing(TaskList::getCreationDate))
+                .collect(Collectors.toList());
+    }
+
+    // Retrieves TaskLists for a username, sorted by creation date in descending order
+    public List<TaskList> getTaskListsSortedByCreationDateDesc(String username) {
+        return taskListRepository.findByUsername(username).stream()
+                .sorted(Comparator.comparing(TaskList::getCreationDate).reversed())
+                .collect(Collectors.toList());
+    }
+
+    // Retrieves TaskLists for a username, sorted by the number of tasks in ascending order
+    public List<TaskList> getTaskListsSortedByTaskCountAsc(String username) {
+        return taskListRepository.findByUsername(username).stream()
+                .sorted(Comparator.comparing(taskList -> taskList.getTasks().size()))
+                .collect(Collectors.toList());
+    }
+
+    // Retrieves TaskLists for a username, sorted by the number of tasks in descending order
+    public List<TaskList> getTaskListsSortedByTaskCountDesc(String username) {
+        return taskListRepository.findByUsername(username).stream()
+                .sorted(Comparator.comparing((TaskList taskList) -> taskList.getTasks().size()).reversed())
+                .collect(Collectors.toList());
     }
 }
