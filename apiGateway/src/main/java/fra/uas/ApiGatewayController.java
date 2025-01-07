@@ -318,4 +318,50 @@ public class ApiGatewayController {
             throw new RuntimeException("Failed to forward analytics request: " + e.getMessage(), e);
         }
     }
+
+    //Retrieve all analytics of the user
+    @RequestMapping(value = "/analytics", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> getTaskStatistics(
+            @RequestHeader("Authorization") String authToken,
+            @RequestParam String username) {
+        try {
+            List<TaskList> taskLists = getAndValidateTaskLists(authToken, username);
+            String url = AnalyticServiceUrl + "/task-statistics";
+            return forwardAnalyticsRequest(url, taskLists);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+        }
+    }
+
+    //Retrieve the analytics of the user of one specific year
+    @RequestMapping(value = "/analytics/year", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> getTaskStatisticsForYear(
+            @RequestHeader("Authorization") String authToken,
+            @RequestParam String username,
+            @RequestParam int year) {
+        try {
+            List<TaskList> taskLists = getAndValidateTaskLists(authToken, username);
+            String url = AnalyticServiceUrl + "/task-statistics/year?year=" + year;
+            return forwardAnalyticsRequest(url, taskLists);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+        }
+    }
+
+    //Retrieve the analytics of the user of one specific date range
+    @RequestMapping(value = "/analytics/date-range", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> getTaskStatisticsForDateRange(
+            @RequestHeader("Authorization") String authToken,
+            @RequestParam String username,
+            @RequestParam String startDate,
+            @RequestParam String endDate) {
+
+        try {
+            List<TaskList> taskLists = getAndValidateTaskLists(authToken, username);
+            String url = AnalyticServiceUrl + "/task-statistics/date-range?startDate=" + startDate + "&endDate=" + endDate;
+            return forwardAnalyticsRequest(url, taskLists);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+        }
+    }
 }
