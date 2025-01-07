@@ -188,4 +188,10 @@ public class TaskListController {
             @Argument String title) {
         return taskListService.updateTaskListTitle(taskListId, title);
     }
+
+    // Retrieves TaskLists for a specific username
+    @SchemaMapping(typeName = "Query", field = "getTaskListsByUsername")
+    public List<TaskList> getTaskListsByUsername(@Argument String username) {
+        return taskListService.getTaskListsByUsername(username);
+    }
 }
