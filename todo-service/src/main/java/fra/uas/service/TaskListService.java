@@ -28,4 +28,27 @@ public class TaskListService {
         TaskList taskList = new TaskList(username, LocalDate.now(), title, List.of());
         return taskListRepository.save(taskList);
     }
+
+    public TaskList addTasksToTaskList(Long taskListId, List<Task> tasks) {
+        TaskList taskList = taskListRepository.findById(taskListId)
+                .orElseThrow(() -> new IllegalArgumentException("TaskList with ID " + taskListId + " not found."));
+        taskList.getTasks().addAll(tasks);
+        return taskListRepository.save(taskList);
+    }
+
+    // Retrieves all TaskLists from the database
+    public List<TaskList> getAllTaskLists() {
+        return taskListRepository.findAll();
+    }
+
+    // Retrieves a specific TaskList by its ID
+    public TaskList getTaskListById(Long id) {
+        return taskListRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("TaskList with ID " + id + " not found."));
+    }
+
+    // Retrieves all TaskLists for a specific username
+    public List<TaskList> getTaskListsByUsername(String username) {
+        return taskListRepository.findByUsername(username);
+    }
 }
