@@ -8,10 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.*;
 
 @Controller
 public class UserController {
@@ -52,5 +49,42 @@ public class UserController {
         } else {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("You are not logged in or the session has expired");
         }
+    }
+
+    // Delete a User
+    @DeleteMapping("/user")
+    public ResponseEntity<?> deleteUser(@RequestHeader("Authorization") String token) {
+        String username = tokenService.getUsernameByToken(token);
+        boolean result = userService.deleteUser(username);
+        if (result) {
+            return ResponseEntity.ok("User " + username + " deleted successfully");
+        } else {
+            return ResponseEntity.badRequest().body("User not found or could not be deleted");
+        }
+    }
+
+    @GetMapping("/username")
+    public ResponseEntity<?> getUsernameByToken(@RequestHeader("Authorization") String authToken) {
+        String username = tokenService.getUsernameByToken(authToken);
+        if (username != null) {
+            return ResponseEntity.ok(username);
+        } else {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid token or user not found");
+        }
+    }
+
+
+    // Get list of all Users
+    @GetMapping("/list")
+    public ResponseEntity<?> getUserList(@RequestHeader("Authorization") String token) {
+        if (tokenService.isTokenValid(token)) {
+            String username = tokenService.getUsernameByToken(token);
+            User user = userService.getUser(username);
+            if (user != null) {
+                return ResponseEntity.ok(userService.getUserList());
+            }
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User does not exist");
+        }
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("You are not logged in or the session has expired");
     }
 }
