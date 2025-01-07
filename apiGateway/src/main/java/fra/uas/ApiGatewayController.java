@@ -8,6 +8,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.Map;
+
 @CrossOrigin(origins = "http://localhost:3001", allowCredentials = "true")
 @RestController
 @RequestMapping("/gateway")
@@ -81,6 +83,80 @@ public class ApiGatewayController {
             return restTemplate.exchange(userServiceUrl + "/protected", HttpMethod.GET, request, String.class);
         } catch (HttpClientErrorException e) {
             return ResponseEntity.status(e.getStatusCode()).body(e.getStatusText());
+        }
+    }
+
+    //Endpoint to forward GraphQL Data Retrievement queries
+    @PostMapping
+    public ResponseEntity<?> forwardGraphQL(@RequestBody String graphqlQuery, @RequestHeader("Authorization") String authToken) {
+        var resp = protectedEndpoint(authToken);
+        if (resp.getStatusCode().is2xxSuccessful()) {
+
+            String url = todoBackendUrl + "/graphql";
+
+            // Set appropriate headers
+            HttpHeaders headers = new HttpHeaders();
+            headers.add("Content-Type", "application/json");
+
+            // Forward the request
+            HttpEntity<String> entity = new HttpEntity<>(graphqlQuery, headers);
+            return restTemplate.postForEntity(url, entity, String.class);
+        } else {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("You need to login to book a room");
+        }
+    }
+
+    //Endpoint to create a Tasklist
+    @PostMapping("/tasklists")
+    public ResponseEntity<?> createTaskList(@RequestBody Map<String, Object> payload, @RequestHeader("Authorization") String authToken) {
+        var reso = protectedEndpoint(authToken);
+        if (reso.getStatusCode().is2xxSuccessful()) {
+            String query = "mutation($username: String!, $title: String!) { createTaskList(username: $username, title: $title) { id username title creationDate } }";
+            String url = todoBackendUrl + "/graphql";
+            Map<String, Object> body = Map.of("query", query, "variables", payload);
+            return restTemplate.postForEntity(url, body, String.class);
+        } else {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("You need to login to book a room");
+        }
+    }
+
+    //Endpoint to retrieve all Tasklists
+    @GetMapping("/tasklists")
+    public ResponseEntity<?> getAllTaskLists(@RequestHeader("Authorization") String authToken) {
+        var reso = protectedEndpoint(authToken);
+        if (reso.getStatusCode().is2xxSuccessful()) {
+
+
+            String query = "{ getAllTaskLists { id username title creationDate tasks { id title taskDescription completed dueDate } } }";
+            String url = todoBackendUrl + "/graphql";
+            Map<String, Object> body = Map.of("query", query);
+            return restTemplate.postForEntity(url, body, String.class);
+
+        } else {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("You need to login to book a room");
+        }
+    }
+
+    //Endpoint to retrieve all Tasklists of one user
+    @GetMapping("/tasklists/username")
+    public ResponseEntity<?> getTaskListsByUsername(@RequestParam String username, @RequestHeader("Authorization") String authToken) {
+        // Check if the user is authenticated
+        var reso = protectedEndpoint(authToken);
+        if (reso.getStatusCode().is2xxSuccessful()) {
+            // Define the GraphQL query
+            String query = "{ getTaskListsByUsername(username: \"" + username + "\") { id username title creationDate tasks { id username title taskDescription completed creationDate dueDate completionDate } } }";
+
+            // Set the backend URL
+            String url = todoBackendUrl + "/graphql";
+
+            // Build the request body
+            Map<String, Object> body = Map.of("query", query);
+
+            // Forward the request to the backend
+            return restTemplate.postForEntity(url, body, String.class);
+        } else {
+            // Return unauthorized if the user is not authenticated
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("You need to login to view task lists.");
         }
     }
 }
