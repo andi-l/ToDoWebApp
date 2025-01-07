@@ -70,4 +70,17 @@ public class ApiGatewayController {
             return ResponseEntity.status(e.getStatusCode()).body(e.getStatusText());
         }
     }
+
+    @RequestMapping(value = "/protected", method = RequestMethod.GET)
+    public ResponseEntity<?> protectedEndpoint(@RequestHeader("Authorization") String authToken) {
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", authToken);
+        HttpEntity<?> request = new HttpEntity<>(headers);
+        try {
+            return restTemplate.exchange(userServiceUrl + "/protected", HttpMethod.GET, request, String.class);
+        } catch (HttpClientErrorException e) {
+            return ResponseEntity.status(e.getStatusCode()).body(e.getStatusText());
+        }
+    }
 }
