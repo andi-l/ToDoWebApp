@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.List;
 import java.util.Map;
 
 @CrossOrigin(origins = "http://localhost:3001", allowCredentials = "true")
@@ -157,6 +158,124 @@ public class ApiGatewayController {
         } else {
             // Return unauthorized if the user is not authenticated
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("You need to login to view task lists.");
+        }
+    }
+
+    //Endpoint to delete a Task from a Tasklist
+    @DeleteMapping("/tasklists/{taskListId}/tasks")
+    public ResponseEntity<?> deleteTasksFromTaskList(
+            @PathVariable Long taskListId,
+            @RequestBody List<Long> taskIds,
+            @RequestHeader("Authorization") String authToken) {
+
+        // Validate authorization
+        var reso = protectedEndpoint(authToken);
+        if (!reso.getStatusCode().is2xxSuccessful()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("You need to login to modify tasks.");
+        }
+
+        // GraphQL mutation query
+        String query = "mutation($taskListId: ID!, $taskIds: [ID!]!) { deleteTasksFromTaskList(taskListId: $taskListId, taskIds: $taskIds) { id username title creationDate tasks { id title taskDescription completed dueDate } } }";
+        String url = todoBackendUrl + "/graphql";
+
+        // Build request body
+        Map<String, Object> variables = Map.of(
+                "taskListId", taskListId,
+                "taskIds", taskIds
+        );
+        Map<String, Object> body = Map.of(
+                "query", query,
+                "variables", variables
+        );
+
+        // Forward the request to the backend
+        return restTemplate.postForEntity(url, body, String.class);
+    }
+
+
+    //Endpoint to delete a Tasklist
+    @DeleteMapping("/tasklists/{taskListId}")
+    public ResponseEntity<?> deleteTaskList(
+            @PathVariable Long taskListId,
+            @RequestHeader("Authorization") String authToken) {
+
+        //  authorization
+        var reso = protectedEndpoint(authToken);
+        if (!reso.getStatusCode().is2xxSuccessful()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("You need to login to delete a task list.");
+        }
+
+        // GraphQL mutation query
+        String query = "mutation($taskListId: ID!) { deleteTaskList(taskListId: $taskListId) }";
+        String url = todoBackendUrl + "/graphql";
+
+        //  request body
+        Map<String, Object> variables = Map.of("taskListId", taskListId);
+        Map<String, Object> body = Map.of("query", query, "variables", variables);
+
+        // Forward the request
+        try {
+            ResponseEntity<String> response = restTemplate.postForEntity(url, body, String.class);
+            if (response.getStatusCode().is2xxSuccessful()) {
+                return ResponseEntity.ok("Task list deleted successfully.");
+            } else {
+                return ResponseEntity.status(response.getStatusCode()).body("Failed to delete task list.");
+            }
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred while deleting the task list: " + e.getMessage());
+        }
+    }
+
+    @PatchMapping("/tasklists/{taskListId}/tasks/{taskId}/completion")
+    public ResponseEntity<?> toggleTaskCompletion(
+            @PathVariable Long taskListId,
+            @PathVariable Long taskId,
+            @RequestParam boolean isCompleted,
+            @RequestHeader("Authorization") String authToken) {
+
+        // Validate authorization
+        var reso = protectedEndpoint(authToken);
+        if (!reso.getStatusCode().is2xxSuccessful()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("You need to login to modify tasks.");
+        }
+
+        // GraphQL mutation query
+        String query = """
+                    mutation ToggleTaskCompletion($taskListId: ID!, $taskId: ID!, $isCompleted: Boolean!) {
+                        toggleTaskCompletion(taskListId: $taskListId, taskId: $taskId, isCompleted: $isCompleted) {
+                            id
+                            title
+                            completed
+                            completionDate
+                        }
+                    }
+                """;
+
+        // Build request variables
+        Map<String, Object> variables = Map.of(
+                "taskListId", taskListId,
+                "taskId", taskId,
+                "isCompleted", isCompleted
+        );
+
+        // Build the request body
+        Map<String, Object> body = Map.of(
+                "query", query,
+                "variables", variables
+        );
+
+        // Forward the request to the GraphQL backend
+        String url = todoBackendUrl + "/graphql";
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<Map<String, Object>> entity = new HttpEntity<>(body, headers);
+
+        try {
+            ResponseEntity<String> response = restTemplate.postForEntity(url, entity, String.class);
+            return ResponseEntity.status(response.getStatusCode()).body(response.getBody());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Failed to toggle task completion: " + e.getMessage());
         }
     }
 }
