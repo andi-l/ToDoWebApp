@@ -1,11 +1,14 @@
 package fra.uas.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import fra.uas.TaskListDeserializer;
 import jakarta.persistence.*;
 
 import java.time.LocalDate;
 import java.util.List;
 
+@JsonDeserialize(using = TaskListDeserializer.class)
 @Entity
 public class TaskList {
 
