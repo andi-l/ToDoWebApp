@@ -29,6 +29,7 @@ public class TaskListService {
         return taskListRepository.save(taskList);
     }
 
+    // Adds a list of tasks to an existing TaskList and saves the updated TaskList
     public TaskList addTasksToTaskList(Long taskListId, List<Task> tasks) {
         TaskList taskList = taskListRepository.findById(taskListId)
                 .orElseThrow(() -> new IllegalArgumentException("TaskList with ID " + taskListId + " not found."));
@@ -50,5 +51,36 @@ public class TaskListService {
     // Retrieves all TaskLists for a specific username
     public List<TaskList> getTaskListsByUsername(String username) {
         return taskListRepository.findByUsername(username);
+    }
+
+    // Updates the details of a TaskList, including tasks, and saves the updated TaskList
+    public TaskList updateTaskList(Long taskListId, String username, String creationDate, List<Task> updatedTasks, String title) {
+        TaskList taskList = taskListRepository.findById(taskListId)
+                .orElseThrow(() -> new IllegalArgumentException("TaskList with ID " + taskListId + " not found."));
+
+        taskList.setUsername(username);
+        taskList.setCreationDate(LocalDate.parse(creationDate));
+        taskList.setTitle(title);
+        taskList.getTasks().clear();
+        taskList.getTasks().addAll(updatedTasks);
+        return taskListRepository.save(taskList);
+    }
+
+    // Deletes a TaskList by its ID
+    public void deleteTaskList(Long taskListId) {
+        TaskList taskList = taskListRepository.findById(taskListId)
+                .orElseThrow(() -> new IllegalArgumentException("TaskList not found with ID: " + taskListId));
+        taskListRepository.delete(taskList);
+    }
+
+    // Removes specific tasks from a TaskList and saves the updated TaskList
+    public TaskList deleteTasksFromTaskList(Long taskListId, List<Long> taskIds) {
+        TaskList taskList = taskListRepository.findById(taskListId)
+                .orElseThrow(() -> new IllegalArgumentException("TaskList with ID " + taskListId + " not found."));
+        List<Task> tasksToRemove = taskList.getTasks().stream()
+                .filter(task -> taskIds.contains(task.getId()))
+                .toList();
+        taskList.getTasks().removeAll(tasksToRemove);
+        return taskListRepository.save(taskList);
     }
 }
