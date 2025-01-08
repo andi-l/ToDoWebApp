@@ -1,6 +1,7 @@
 package fra.uas;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import fra.uas.model.TaskList;
@@ -219,7 +220,17 @@ public class ApiGatewayController {
 
         // Forward the request
         try {
-            return restTemplate.postForEntity(url, body, String.class);
+            ResponseEntity<String> response = restTemplate.postForEntity(url, body, String.class);
+            JsonNode root = new ObjectMapper().readTree(response.getBody());
+            boolean isDeleted = root.get("data").get("deleteTaskList").asBoolean();
+
+            if (isDeleted) {
+                return ResponseEntity.ok("Task list deleted successfully.");
+            } else {
+                return ResponseEntity
+                        .status(HttpStatus.CONFLICT)
+                        .body("Task list cannot be deleted");
+            }
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred while deleting the task list: " + e.getMessage());
         }

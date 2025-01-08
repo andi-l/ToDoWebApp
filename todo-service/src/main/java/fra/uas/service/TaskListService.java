@@ -69,7 +69,7 @@ public class TaskListService {
     }
 
     // Deletes a TaskList by its ID
-    public Boolean deleteTaskList(Long taskListId) {
+    public boolean deleteTaskList(Long taskListId) {
         TaskList taskList = taskListRepository.findById(taskListId).orElse(
                 null
         );

@@ -123,16 +123,9 @@ public class TaskListController {
 
     // Deletes a specific TaskList
     @SchemaMapping(typeName = "Mutation", field = "deleteTaskList")
-    public ResponseEntity<String> deleteTaskList(@Argument Long taskListId) {
-        boolean isDeleted = taskListService.deleteTaskList(taskListId);
+    public boolean deleteTaskList(@Argument Long taskListId) {
 
-        if (!isDeleted) {
-            return ResponseEntity
-                    .status(HttpStatus.CONFLICT)
-                    .body("Task list cannot be deleted");
-        }
-
-        return ResponseEntity.ok("Task list deleted successfully");
+        return taskListService.deleteTaskList(taskListId);
     }
 
     // Deletes specific tasks from a TaskList
