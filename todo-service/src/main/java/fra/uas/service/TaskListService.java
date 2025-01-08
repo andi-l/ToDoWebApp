@@ -69,10 +69,16 @@ public class TaskListService {
     }
 
     // Deletes a TaskList by its ID
-    public void deleteTaskList(Long taskListId) {
-        TaskList taskList = taskListRepository.findById(taskListId)
-                .orElseThrow(() -> new IllegalArgumentException("TaskList not found with ID: " + taskListId));
+    public Boolean deleteTaskList(Long taskListId) {
+        TaskList taskList = taskListRepository.findById(taskListId).orElse(
+                null
+        );
+        if (taskList == null) {
+            return false;
+        }
+
         taskListRepository.delete(taskList);
+        return true;
     }
 
     // Removes specific tasks from a TaskList and saves the updated TaskList

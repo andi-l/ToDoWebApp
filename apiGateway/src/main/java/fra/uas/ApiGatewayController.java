@@ -219,12 +219,7 @@ public class ApiGatewayController {
 
         // Forward the request
         try {
-            ResponseEntity<String> response = restTemplate.postForEntity(url, body, String.class);
-            if (response.getStatusCode().is2xxSuccessful()) {
-                return ResponseEntity.ok("Task list deleted successfully.");
-            } else {
-                return ResponseEntity.status(response.getStatusCode()).body("Failed to delete task list.");
-            }
+            return restTemplate.postForEntity(url, body, String.class);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred while deleting the task list: " + e.getMessage());
         }

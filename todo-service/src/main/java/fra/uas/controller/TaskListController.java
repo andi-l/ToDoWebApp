@@ -6,6 +6,8 @@ import fra.uas.model.TaskList;
 import fra.uas.service.TaskListService;
 import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.SchemaMapping;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 
 import java.time.LocalDate;
@@ -121,13 +123,16 @@ public class TaskListController {
 
     // Deletes a specific TaskList
     @SchemaMapping(typeName = "Mutation", field = "deleteTaskList")
-    public boolean deleteTaskList(@Argument Long taskListId) {
-        try {
-            taskListService.deleteTaskList(taskListId);
-            return true;
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to delete TaskList with ID: " + taskListId, e);
+    public ResponseEntity<String> deleteTaskList(@Argument Long taskListId) {
+        boolean isDeleted = taskListService.deleteTaskList(taskListId);
+
+        if (!isDeleted) {
+            return ResponseEntity
+                    .status(HttpStatus.CONFLICT)
+                    .body("Task list cannot be deleted");
         }
+
+        return ResponseEntity.ok("Task list deleted successfully");
     }
 
     // Deletes specific tasks from a TaskList
