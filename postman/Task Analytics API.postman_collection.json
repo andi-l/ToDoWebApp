@@ -1,0 +1,136 @@
+{
+	"info": {
+		"_postman_id": "0b954c23-700a-4df9-9f60-a021b104aeff",
+		"name": "Task Analytics API",
+		"description": "Postman collection for analytics-related methods.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json",
+		"_exporter_id": "19878151"
+	},
+	"item": [
+		{
+			"name": "Get Task Statistics",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "45296c56-4ab1-40e0-b54a-e8b112a5854b",
+						"type": "text"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:8081/gateway/analytics?username=MaxMustermann",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"gateway",
+						"analytics"
+					],
+					"query": [
+						{
+							"key": "username",
+							"value": "MaxMustermann"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Task Statistics for Year",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "45296c56-4ab1-40e0-b54a-e8b112a5854b",
+						"type": "text"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:8081/gateway/analytics/year?username=MaxMustermann&year=2025",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"gateway",
+						"analytics",
+						"year"
+					],
+					"query": [
+						{
+							"key": "username",
+							"value": "MaxMustermann"
+						},
+						{
+							"key": "year",
+							"value": "2025"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Task Statistics for Date Range",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "45296c56-4ab1-40e0-b54a-e8b112a5854b",
+						"type": "text"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:8081/gateway/analytics/date-range?username=MaxMustermann&startDate=2025-01-01&endDate=2025-01-31",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"gateway",
+						"analytics",
+						"date-range"
+					],
+					"query": [
+						{
+							"key": "username",
+							"value": "MaxMustermann"
+						},
+						{
+							"key": "startDate",
+							"value": "2025-01-01"
+						},
+						{
+							"key": "endDate",
+							"value": "2025-01-31"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

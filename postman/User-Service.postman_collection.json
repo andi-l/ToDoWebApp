@@ -1,0 +1,79 @@
+{
+	"info": {
+		"_postman_id": "0c998043-1c3e-4373-b6b4-140de33eee5b",
+		"name": "UserService",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json",
+		"_exporter_id": "19878151"
+	},
+	"item": [
+		{
+			"name": "localhost:8080/gateway/user",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\"username\":\"MaxMustermann\",\n\"firstName\":\"Max\",\n\"lastName\":\"Mustermann\",\n\"password\":\"Max123\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": "localhost:8081/gateway/user"
+			},
+			"response": []
+		},
+		{
+			"name": "localhost:8080/gateway/login",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "",
+						"type": "default"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\"username\":\"MaxMustermann\",\n \"password\":\"Max123\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": "localhost:8081/gateway/login"
+			},
+			"response": []
+		},
+		{
+			"name": "localhost:8080/gateway/protected",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "f2e6b8f6-b6b7-41fe-a7fd-fc58d957adf8",
+						"type": "default"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\"username\":\"MaxMustermann\",\n\"firstName\":\"Max\",\n \"lastName\":\"Mustermann\",\n \"email\":\"maxmustermann@gmail.com\",\n \"password\":\"Max123\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": "localhost:8081/gateway/protected"
+			},
+			"response": []
+		}
+	]
+}
