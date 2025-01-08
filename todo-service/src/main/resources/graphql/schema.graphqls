@@ -51,7 +51,7 @@ type Mutation {
     updateTaskList(taskListId: ID!,username: String!,creationDate: String!,title:String!,tasks: [TaskInput!]!): TaskList
 
     deleteTaskList(taskListId: ID!): Boolean # New mutation
-    deleteTasksFromTaskList(taskListId: ID!, taskIds: [ID!]!): TaskList
+    deleteTasksFromTaskList(taskListId: ID!, taskIds: [ID!]!): Boolean
 
     toggleTaskCompletion(taskListId: ID!, taskId: ID!, isCompleted: Boolean!): Task
 

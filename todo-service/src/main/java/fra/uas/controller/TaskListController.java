@@ -130,7 +130,7 @@ public class TaskListController {
 
     // Deletes specific tasks from a TaskList
     @SchemaMapping(typeName = "Mutation", field = "deleteTasksFromTaskList")
-    public TaskList deleteTasksFromTaskList(@Argument Long taskListId, @Argument List<Long> taskIds) {
+    public boolean deleteTasksFromTaskList(@Argument Long taskListId, @Argument List<Long> taskIds) {
         return taskListService.deleteTasksFromTaskList(taskListId, taskIds);
     }
 

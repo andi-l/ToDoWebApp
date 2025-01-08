@@ -34,7 +34,10 @@ public class TaskListService {
     // Adds a list of tasks to an existing TaskList and saves the updated TaskList
     public TaskList addTasksToTaskList(Long taskListId, List<Task> tasks) {
         TaskList taskList = taskListRepository.findById(taskListId)
-                .orElseThrow(() -> new IllegalArgumentException("TaskList with ID " + taskListId + " not found."));
+                .orElse(null);
+        if (taskList == null) {
+            return null;
+        }
         taskList.getTasks().addAll(tasks);
         return taskListRepository.save(taskList);
     }
@@ -44,10 +47,11 @@ public class TaskListService {
         return taskListRepository.findAll();
     }
 
+
     // Retrieves a specific TaskList by its ID
     public TaskList getTaskListById(Long id) {
         return taskListRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("TaskList with ID " + id + " not found."));
+                .orElse(null);
     }
 
     // Retrieves all TaskLists for a specific username
@@ -58,8 +62,11 @@ public class TaskListService {
     // Updates the details of a TaskList, including tasks, and saves the updated TaskList
     public TaskList updateTaskList(Long taskListId, String username, String creationDate, List<Task> updatedTasks, String title) {
         TaskList taskList = taskListRepository.findById(taskListId)
-                .orElseThrow(() -> new IllegalArgumentException("TaskList with ID " + taskListId + " not found."));
+                .orElse(null);
 
+        if (taskList == null) {
+            return null;
+        }
         taskList.setUsername(username);
         taskList.setCreationDate(LocalDate.parse(creationDate));
         taskList.setTitle(title);
@@ -82,14 +89,21 @@ public class TaskListService {
     }
 
     // Removes specific tasks from a TaskList and saves the updated TaskList
-    public TaskList deleteTasksFromTaskList(Long taskListId, List<Long> taskIds) {
+    public boolean deleteTasksFromTaskList(Long taskListId, List<Long> taskIds) {
         TaskList taskList = taskListRepository.findById(taskListId)
-                .orElseThrow(() -> new IllegalArgumentException("TaskList with ID " + taskListId + " not found."));
+                .orElse(null);
+        if (taskList == null) {
+            return false;
+        }
         List<Task> tasksToRemove = taskList.getTasks().stream()
                 .filter(task -> taskIds.contains(task.getId()))
                 .toList();
+        if (tasksToRemove.isEmpty()) {
+            return false;
+        }
         taskList.getTasks().removeAll(tasksToRemove);
-        return taskListRepository.save(taskList);
+        taskListRepository.save(taskList);
+        return true;
     }
 
     // Retrieves TaskLists for a username, sorted by creation date in ascending order
@@ -123,11 +137,17 @@ public class TaskListService {
     // Toggles the completion status of a task and updates its completion date accordingly
     public Task toggleTaskCompletion(Long taskListId, Long taskId, boolean isCompleted) {
         TaskList taskList = taskListRepository.findById(taskListId)
-                .orElseThrow(() -> new IllegalArgumentException("TaskList with ID " + taskListId + " not found."));
+                .orElse(null);
+        if (taskList == null) {
+            return null;
+        }
         Task task = taskList.getTasks().stream()
                 .filter(t -> t.getId().equals(taskId))
                 .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("Task with ID " + taskId + " not found in TaskList " + taskListId));
+                .orElse(null);
+        if (task == null) {
+            return null;
+        }
         task.setCompleted(isCompleted);
         task.setCompletionDate(isCompleted ? LocalDate.now() : null);
         taskListRepository.save(taskList);
@@ -141,7 +161,10 @@ public class TaskListService {
         Task task = taskList.getTasks().stream()
                 .filter(t -> t.getId().equals(taskId))
                 .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("Task with ID " + taskId + " not found in TaskList " + taskListId));
+                .orElse(null);
+        if (task == null) {
+            return null;
+        }
         if (title != null) {
             task.setTitle(title);
         }
@@ -158,7 +181,10 @@ public class TaskListService {
     // Updates the title of a specific TaskList
     public TaskList updateTaskListTitle(Long taskListId, String title) {
         TaskList taskList = taskListRepository.findById(taskListId)
-                .orElseThrow(() -> new IllegalArgumentException("TaskList with ID " + taskListId + " not found."));
+                .orElse(null);
+        if (taskList == null) {
+            return null;
+        }
         if (title != null) {
             taskList.setTitle(title);
         }
