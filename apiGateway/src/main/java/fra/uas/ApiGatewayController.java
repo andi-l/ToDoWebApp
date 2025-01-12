@@ -3,6 +3,7 @@ package fra.uas;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import fra.uas.model.TaskList;
 import fra.uas.model.User;
@@ -537,10 +538,25 @@ public class ApiGatewayController {
         }
 
         // Extract and deserialize task lists so that the Analyticservice can use them
-        String taskListsJson = (String) response.getBody();
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.registerModule(new JavaTimeModule());
-        Root root = objectMapper.readValue(taskListsJson, Root.class);
+
+        Object responseBody = response.getBody();
+        String taskListsJson;
+
+        if (responseBody instanceof String) {
+            taskListsJson = (String) responseBody;
+        } else if (responseBody instanceof ObjectNode) {
+            taskListsJson = objectMapper.writeValueAsString(responseBody);
+        } else {
+            throw new RuntimeException("Unexpected response body type: " + responseBody.getClass());
+        }
+
+        // Wrap the JSON in a "data" field
+        String wrappedJson = "{\"data\":" + taskListsJson + "}";
+
+        // Deserialize into Root class
+        Root root = objectMapper.readValue(wrappedJson, Root.class);
 
         return root.getData().getGetTaskListsByUsername();
     }
